@@ -1,15 +1,8 @@
 from fastapi import FastAPI
 app = FastAPI()
 
-@app.get("/health")
-
-def health():
+@app.get("/welcome")
+def welcome():
     return{
-  "status": "ok",
-  "service": "mini-rag"
-}
-@app.get("/version")
-def version():
-    return{
-  "version": "1.0.0"
-}
+        "massege": "Hello world!"
+    }
