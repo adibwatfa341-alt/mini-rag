@@ -1,0 +1,19 @@
+from pydantic import BaseModel, Field, validator
+from typing import Optional
+from bson.objectid import ObjectId
+
+# يمثل شكل البيانات
+class Project(BaseModel):
+    id: Optional[ObjectId] = Field(None, alias="_id")
+    # alias ="_id" meaning :عندما تتعامل مع MongoDB استخدم _id، أما داخل الكود فسأتعامل معه باسم id.
+    project_id: str = Field(..., min_length=1)
+
+    @validator("project_id")
+    def validate_project_id(cls, value):
+        if not value.isalnum():
+            raise ValueError('project_id must be alphanumeric')
+        return value
+
+
+    class Config:
+        arbitrary_types_allowed = True

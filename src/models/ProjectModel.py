@@ -1,0 +1,46 @@
+from .BaseDataModel import BaseDataModel
+from .db_schemes import Project
+from .enums.DataBaseEnum import DataBaseEnum
+#Class آخر يكون مسؤولًا عن التعامل مع قاعدة البيانات.
+# اما Project يمثل شكل البيانات.
+class ProjectModel(BaseDataModel):
+    def __init__(self, db_client: object):
+        super().__init__(db_client=db_client)
+        self.collection = self.db_client[DataBaseEnum.COLLECTION_PROJECT_NAME.value]
+
+    async def create_project(self, project: Project):
+        result = await self.collection.insert_one(project.dict(by_alias=True,exclude_unset=True))
+        project._id = result.inserted_id
+
+        return project
+
+    async def get_project_or_create_one(self, project_id: str):
+        # ابحث عن مشروع يحمل هذا project_id.
+        record = await self.collection.find_one({"project_id":project_id})
+        if record is None:
+            # أبني Object جديد.
+            project = Project(project_id=project_id)
+            # بدل عمل اضافة دالة create_project تقوم بالعمل هذا
+            project = await self.create_project(project=project)
+
+            return project
+
+        return Project(**record)
+
+    # أريد عرض المشاريع.
+    async def get_all_projects(self, page: int=1, page_size: int=10):
+        # كم مشروع موجود أصلًا؟ # count total number of documents
+        total_documents = await self.collection.count_documents({})
+        # calculate total number of pages
+        total_pages = total_documents // page_size
+        if total_documents % page_size > 0:
+            total_pages += 1
+            # أعطني جميع المشاريع. تجاهل المشاريع الخاصة بالصفحات السابقة.
+        cursor = self.collection.find().skip( (page-1) * page_size ).limit(page_size)
+        # سأجمع النتائج هنا.
+        projects = []
+        async for document in cursor:
+            projects.append(
+                Project(**document)
+            )
+        return projects, total_pages
