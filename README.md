@@ -1,41 +1,45 @@
 # mini-rag
 
-This is a minimal implementation of the RAG model for question answering.
+A Retrieval-Augmented Generation (RAG) question-answering API built with **FastAPI** and **MongoDB**. The project is built step by step, and each step lives on its own branch.
 
-## Requirements
+## Status
 
-- Python 3.8 or later
+The work is on the `tut-*` branches. The latest one is **`tut-007`**.
 
-#### Install Python using MiniConda
+| Branch | Step |
+|---|---|
+| `tut-001` | Project setup |
+| `tut-002` – `tut-005` | FastAPI app, settings, file upload and validation, file processing and chunking |
+| `tut-006` | MongoDB with Docker Compose |
+| `tut-007` | MongoDB models for projects, assets and chunks, with indexes |
 
-1) Download and install MiniConda from [here](https://docs.anaconda.com/free/miniconda/#quick-command-line-install)
-2) Create a new environment using the following command:
-```bash
-$ conda create -n mini-rag python=3.8
-```
-3) Activate the environment:
-```bash
-$ conda activate mini-rag
-```
+**Next steps:** embeddings, a vector database (Qdrant), and LLM answer generation.
 
-### (Optional) Setup you command line interface for better readability
+## Stack
 
-```bash
-export PS1="\[\033[01;32m\]\u@\h:\w\n\[\033[00m\]\$ "
-```
+Python · FastAPI · Pydantic Settings · LangChain text splitters · PyMuPDF · MongoDB (Motor) · Docker Compose
 
-## Installation
-
-### Install the required packages
+## Run it
 
 ```bash
-$ pip install -r requirements.txt
+git checkout tut-007
+cd src
+pip install -r requirements.txt
+cp .env.example .env            # fill in your values
+cd ../docker && cp .env.example .env && docker compose up -d   # MongoDB
+cd ../src && uvicorn main:app --reload --host 0.0.0.0 --port 5000
 ```
 
-### Setup the environment variables
+A Postman collection is in `src/assets/mini-rag-app.postman_collection.json`.
 
-```bash
-$ cp .env.example .env
+## Project layout (tut-007)
+
 ```
-
-Set your environment variables in the `.env` file. Like `OPENAI_API_KEY` value.
+src/
+  main.py              FastAPI app
+  Routes/              API routes and request schemas
+  controllers/         upload, processing and project logic
+  models/              MongoDB models, schemes and enums
+  helpers/config.py    settings from .env
+docker/                MongoDB with Docker Compose
+```
